@@ -1,0 +1,11 @@
+name: JumpAndRun
+version: 0.2
+author: Jannify
+
+
+main: de.Jannify.JandR.JumpSystem
+
+commands:
+  jump:
+    description: Benötigt um jumps zu erstellen und einzustellen
+    aliases: [jumpandrun, jandr]

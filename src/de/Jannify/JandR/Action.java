@@ -23,7 +23,7 @@ import org.bukkit.plugin.Plugin;
 public class Action implements Listener {
 	Plugin pl;
 	FileConfiguration config;
-
+	String test;
 	public Action(Plugin plugin) throws IOException {
 		pl = plugin;
 		config = pl.getConfig();
