@@ -21,9 +21,6 @@ import org.bukkit.material.Dye;
 import org.bukkit.plugin.Plugin;
 
 public class Action implements Listener {
-	Plugin pl;
-	FileConfiguration config;
-	String test;
 	public Action(Plugin plugin) throws IOException {
 		pl = plugin;
 		config = pl.getConfig();
@@ -46,21 +43,27 @@ public class Action implements Listener {
 		Item2.setItemMeta(Meta2);
 
 		Player p = e.getPlayer();
-		if (p.getLocation().getBlock().getType() == Material.IRON_PLATE) {
-			if (!PlayerList.containsKey(p)) {
-				String JumpName = getNearbyEntities(p.getLocation(), 2).get(0).getCustomName();
-				PlayerList.put(p, JumpName);
-				p.getInventory().clear();
+		try {
+			if (p.getLocation().getBlock().getType() == Material.IRON_PLATE) {
+				if (!PlayerList.containsKey(p)) {
+					if (!getNearbyEntities(p.getLocation(), 2).isEmpty()) {
+						String JumpName = getNearbyEntities(p.getLocation(), 2).get(0).getCustomName().toString();
+						PlayerList.put(p, JumpName);
+						p.getInventory().clear();
 
-				p.getInventory().addItem(Item);
-				p.getInventory().addItem(Item2);
-				p.sendMessage("Du joinst Jump " + JumpName);
+						p.getInventory().addItem(Item);
+						p.getInventory().addItem(Item2);
+						p.sendMessage("Du joinst Jump " + JumpName);
+					}
+				}
+			} else if (p.getLocation().getBlock().getType() == Material.GOLD_PLATE) {
+				p.sendMessage("Jumps." + PlayerList.get(p));
+				PlayerList.remove(p);
+				p.getInventory().clear();
+				p.sendMessage("Du hast es geschaft");
 			}
-		} else if (p.getLocation().getBlock().getType() == Material.GOLD_PLATE) {
-			p.sendMessage("Jumps."+PlayerList.get(p));
-			PlayerList.remove(p);
-			p.getInventory().clear();
-			p.sendMessage("Du hast es geschaft");
+		} catch (Exception ex) {
+			System.out.println(ex);
 		}
 	}
 
@@ -86,5 +89,9 @@ public class Action implements Listener {
 		}
 		return true;
 	}
+	
+	public Plugin pl;
+	public FileConfiguration config;
+
 
 }

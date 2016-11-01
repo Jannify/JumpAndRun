@@ -31,7 +31,6 @@ public class JumpSystem extends JavaPlugin {
         {
             System.out.println(prefix+"Config not found! Creating..");
             getConfig().options().header("#############################################\n# - JumpAndRun Updated By Jannify - #\n#############################################");
-            getConfig().addDefault("Test", "Test");
             getConfig().addDefault("Jumps", "");
             getConfig().options().copyHeader(true);
             getConfig().options().copyDefaults(true);

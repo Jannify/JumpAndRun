@@ -17,8 +17,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
-public class AdminCommand implements Listener, CommandExecutor {
+public class AdminCommand extends JavaPlugin implements Listener, CommandExecutor {
 	public AdminCommand(Plugin plugin) throws IOException {
 		pl = plugin;
 		config = pl.getConfig();
@@ -29,7 +30,7 @@ public class AdminCommand implements Listener, CommandExecutor {
 		Player p = (Player) cs;
 		pl.saveConfig();
 		pl.reloadConfig();
-		
+
 		if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
 			p.sendMessage(ChatColor.GOLD + "===========[ " + ChatColor.RED + "JumpAndRun+" + ChatColor.GOLD + " ]===========");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump help:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Gibt hilfe");
@@ -53,7 +54,7 @@ public class AdminCommand implements Listener, CommandExecutor {
 		} else if (args[0] == null) {
 			p.sendMessage("Kein Command angegeben.");
 		} else if (args[0].equalsIgnoreCase("create")) {
-			createJump(args[1]);
+			createJump(args[1], p);
 			p.sendMessage("Jump: " + args[1] + " wurde erstellt");
 		} else if (args[0].equalsIgnoreCase("remove")) {
 			removeJump(args[1]);
@@ -91,7 +92,7 @@ public class AdminCommand implements Listener, CommandExecutor {
 									addMaterial(JumpName, param);
 									p.sendMessage("Material: " + mat + " wurde hinzugefügt");
 								} else if (args[0].equalsIgnoreCase("removeMaterial")) {
-									removeMaterial(JumpName, param, p);
+									removeMaterial(JumpName, param);
 									p.sendMessage("Material: " + mat + " wurde entfernt");
 								} else {
 									p.sendMessage(args[0] + " ist kein bekannter Command");
@@ -113,14 +114,8 @@ public class AdminCommand implements Listener, CommandExecutor {
 		return true;
 	}
 
-	public void createJump(String Name) {
-		config.set("Jumps." + Name, "");
-		pl.saveConfig();
-		pl.reloadConfig();
-		config.set("Jumps." + Name + ".Material", "");
-		pl.saveConfig();
-		pl.reloadConfig();
-		config.set("Jumps." + Name + ".Money", 0);
+	public void createJump(String Name, Player p) {
+		config.set("Jumps", "Test");
 		pl.saveConfig();
 		pl.reloadConfig();
 	}
@@ -152,7 +147,7 @@ public class AdminCommand implements Listener, CommandExecutor {
 		config.set("Jumps." + Name + ".Material", Materials);
 	}
 
-	public void removeMaterial(String Name, int mat, Player p) {
+	public void removeMaterial(String Name, int mat) {
 		Materials = (ArrayList<Integer>) config.getIntegerList("Jumps." + Name + ".Material");
 		Materials.remove((Object) mat);
 		config.set("Jumps." + Name + ".Material", Materials);
