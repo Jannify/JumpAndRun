@@ -7,5 +7,4 @@
 			<attribute name="javadoc_location" value="http://twizmwaz.in/docs/bukkit/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="bin"/>
 </classpath>
