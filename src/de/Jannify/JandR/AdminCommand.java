@@ -21,14 +21,13 @@ import org.bukkit.plugin.Plugin;
 public class AdminCommand implements Listener, CommandExecutor {
 	public AdminCommand(Plugin plugin) throws IOException {
 		pl = plugin;
-		config = pl.getConfig();
+		config = plugin.getConfig();
 	}
 
 	@SuppressWarnings("deprecation")
 	public boolean onCommand(CommandSender cs, Command cmd, String label, String args[]) {
 		Player p = (Player) cs;
 		pl.saveConfig();
-		pl.reloadConfig();
 		
 		if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
 			p.sendMessage(ChatColor.GOLD + "===========[ " + ChatColor.RED + "JumpAndRun+" + ChatColor.GOLD + " ]===========");
@@ -53,7 +52,7 @@ public class AdminCommand implements Listener, CommandExecutor {
 		} else if (args[0] == null) {
 			p.sendMessage("Kein Command angegeben.");
 		} else if (args[0].equalsIgnoreCase("create")) {
-			createJump(args[1]);
+			createJump(args[1], p);
 			p.sendMessage("Jump: " + args[1] + " wurde erstellt");
 		} else if (args[0].equalsIgnoreCase("remove")) {
 			removeJump(args[1]);
@@ -109,20 +108,14 @@ public class AdminCommand implements Listener, CommandExecutor {
 			}
 		}
 		pl.saveConfig();
-		pl.reloadConfig();
 		return true;
 	}
 
-	public void createJump(String Name) {
+	public void createJump(String Name, Player p) {
+		p.sendMessage(config.getString("Jumps").toString());
 		config.set("Jumps." + Name, "");
+		p.sendMessage(config.getString("Jumps.Test").toString());
 		pl.saveConfig();
-		pl.reloadConfig();
-		config.set("Jumps." + Name + ".Material", "");
-		pl.saveConfig();
-		pl.reloadConfig();
-		config.set("Jumps." + Name + ".Money", 0);
-		pl.saveConfig();
-		pl.reloadConfig();
 	}
 
 	public void removeJump(String Name) {

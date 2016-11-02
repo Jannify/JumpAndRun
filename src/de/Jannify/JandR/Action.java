@@ -47,7 +47,8 @@ public class Action implements Listener {
 
 		Player p = e.getPlayer();
 		if (p.getLocation().getBlock().getType() == Material.IRON_PLATE) {
-			if (!PlayerList.containsKey(p)) {
+			p.sendMessage(p.toString());
+			if (!PlayerList.containsKey(p) || PlayerList.isEmpty()) {
 				String JumpName = getNearbyEntities(p.getLocation(), 2).get(0).getCustomName();
 				PlayerList.put(p, JumpName);
 				p.getInventory().clear();
