@@ -1,5 +1,6 @@
 package de.Jannify.JandR;
 
+import java.awt.List;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ public class Action implements Listener {
 		econ = Econ;
 	}
 	
-	Array[] Inv = null;
+	List<ItemStack> Inv = new ArrayList<ItemStack>();
 	HashMap<Player, String> PlayerList = new HashMap<Player, String>();
 	HashMap<Player, Array[]> PlayerInv = new HashMap<Player, Array[]>();
 
