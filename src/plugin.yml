@@ -1,11 +1,11 @@
 name: JumpAndRun
 version: 0.2
 author: Jannify
-
+depend: [ Vault ]
 
 main: de.Jannify.JandR.JumpSystem
 
 commands:
   jump:
     description: Benötigt um jumps zu erstellen und einzustellen
-    aliases: [jumpandrun, jandr]
+    aliases: [jumpandrun, jandr, jumps]

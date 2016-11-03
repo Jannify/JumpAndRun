@@ -2,9 +2,14 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Spigot/Server/spigot.jar" sourcepath="/Spigot/Server/spigot.jar">
+	<classpathentry kind="lib" path="/Spigot/Server/spigot.jar" sourcepath="/Spigot/Server/spigot-version-1.8.8@21fe7077d91.zip">
 		<attributes>
-			<attribute name="javadoc_location" value="http://twizmwaz.in/docs/bukkit/"/>
+			<attribute name="javadoc_location" value="http://docs.codelanx.com/Bukkit/1.8/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Spigot/Vault.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://milkbowl.github.io/VaultAPI/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>

@@ -1,64 +1,73 @@
 package de.Jannify.JandR;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public class AdminCommand extends JavaPlugin implements Listener, CommandExecutor {
+public class AdminCommand implements Listener, CommandExecutor {
 	public AdminCommand(Plugin plugin) throws IOException {
 		pl = plugin;
-		config = pl.getConfig();
+		config = plugin.getConfig();
 	}
 
-	@SuppressWarnings("deprecation")
 	public boolean onCommand(CommandSender cs, Command cmd, String label, String args[]) {
 		Player p = (Player) cs;
-		pl.saveConfig();
-		pl.reloadConfig();
-
 		if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
 			p.sendMessage(ChatColor.GOLD + "===========[ " + ChatColor.RED + "JumpAndRun+" + ChatColor.GOLD + " ]===========");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump help:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Gibt hilfe");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump syntax:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Zeigt die Syntax von den Befehlen an");
+			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump list:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Zeigt eine Liste der Jumps");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump create:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Erstellt ein JandR");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump remove:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Löscht ein JandR");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump setStart:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Setzt den Start von einem JandR");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump setEnde:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Setzt das Ende von einem JandR");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump setMoney:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Setzt die Belonung von einem JandR");
-			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump addMaterial:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Setzt den Rück TP Block von einem JandR");
-			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump removeMaterial:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Löscht den Rück TP Block von einem JandR");
+			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump setYaw:  " + ChatColor.RESET + "" + ChatColor.WHITE + "Setzt die Gradzahl für den Teleport zum Start");
 		} else if (args[0].equalsIgnoreCase("syntax")) {
 			p.sendMessage(ChatColor.GOLD + "===========[ " + ChatColor.RED + "JumpAndRun+" + ChatColor.GOLD + " ]===========");
+			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump list <Jump> (falls gewünscht");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump create <Name>");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump remove <Name>");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump setStart <Name>");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump setEnde <Name>");
 			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump setMoney <Name> <Geld>");
-			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump addMaterial <Name> <Block-ID>");
-			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump removeMaterial <Name> <Block-ID>");
+			p.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "/jump setYaw <Name> <Gradzahl>");
 		} else if (args[0] == null) {
 			p.sendMessage("Kein Command angegeben.");
 		} else if (args[0].equalsIgnoreCase("create")) {
-			createJump(args[1], p);
+			createJump(args[1]);
 			p.sendMessage("Jump: " + args[1] + " wurde erstellt");
 		} else if (args[0].equalsIgnoreCase("remove")) {
 			removeJump(args[1]);
 			p.sendMessage("Jump: " + args[1] + " wurde gelöscht");
+		} else if (args[0].equalsIgnoreCase("list")) {
+			if (args.length == 1) {
+				for (String jumps : config.getConfigurationSection("Jumps").getKeys(false)) {
+					p.sendMessage(ChatColor.GREEN + jumps);
+				}
+			} else {
+				p.sendMessage("=======" + config.getConfigurationSection("Jumps").getKeys(false) + "=======");
+				for (String jumps : config.getConfigurationSection("Jumps." + args[1]).getKeys(false)) {
+					if (jumps.equals("Start") || jumps.equals("Ende")) {
+						Location loc = config.getVector("Jumps." + args[1] + "." + jumps).toLocation(p.getWorld());
+						p.sendMessage(ChatColor.GREEN + jumps + ": " + ChatColor.RESET + ChatColor.BOLD + ChatColor.GOLD + "  |  " + ChatColor.BLUE + loc.getBlockX() + ChatColor.GOLD + "  |  " + ChatColor.BLUE + loc.getBlockY() + ChatColor.GOLD + "  |  " + ChatColor.BLUE + loc.getBlockZ()
+								+ ChatColor.GOLD + "  |  ");
+					} else {
+						p.sendMessage(ChatColor.GREEN + jumps + ": " + ChatColor.BOLD + ChatColor.BLUE + config.get("Jumps." + args[1] + "." + jumps));
+					}
+				}
+			}
 		} else {
 			if (config.isSet("Jumps." + args[1])) {
 				String JumpName = args[1];
@@ -73,31 +82,15 @@ public class AdminCommand extends JavaPlugin implements Listener, CommandExecuto
 					try {
 						param = Integer.valueOf(args[2]);
 					} catch (Exception e) {
-						p.sendMessage("setMoney, setMaterial und removeMaterial benutzten Zahle als Parameter. " + param + " ist keine Zahl.");
+						p.sendMessage("setMoney, setMaterial und removeMaterial benutzten Zahle(setMoney benutzt Kommazahlen) als Parameter. " + param + " ist keine Zahl.");
 					}
 					if (param != -1) {
 						if (args[0].equalsIgnoreCase("setMoney")) {
-							setMoney(JumpName, param);
+							setMoney(JumpName, Double.valueOf(args[2]));
 							p.sendMessage(param + " Money wurde gesetzt");
-						} else {
-							Material mat;
-							try {
-								mat = Material.getMaterial(param);
-							} catch (Exception e) {
-								p.sendMessage("Der angegebene Parameter(" + param + " passt zu keine Block/Item ID");
-								mat = Material.AIR;
-							}
-							if (mat != Material.AIR) {
-								if (args[0].equalsIgnoreCase("addMaterial")) {
-									addMaterial(JumpName, param);
-									p.sendMessage("Material: " + mat + " wurde hinzugefügt");
-								} else if (args[0].equalsIgnoreCase("removeMaterial")) {
-									removeMaterial(JumpName, param);
-									p.sendMessage("Material: " + mat + " wurde entfernt");
-								} else {
-									p.sendMessage(args[0] + " ist kein bekannter Command");
-								}
-							}
+						} else if (args[0].equalsIgnoreCase("setYaw")) {
+							setYaw(JumpName, param);
+							p.sendMessage(param + "° wurde gesetzt");
 						}
 					}
 				} else {
@@ -105,19 +98,16 @@ public class AdminCommand extends JavaPlugin implements Listener, CommandExecuto
 					p.sendMessage("Falls die Syntax richtig ist, wurde kein Parameter angegeben.");
 				}
 			} else {
-				p.sendMessage("Syntax: /jump <setStart/setEnd/setMoney/...> <JumpName> [falls benözigt Paramenter]");
+				p.sendMessage("Syntax: /jump <setStart/setEnd/setMoney/...> <JumpName> [fals benötigt Paramenter]");
 				p.sendMessage("Falls die Syntax richtig ist, existiert der Jump nicht, erstelle ihn mit /jump create <Name>");
 			}
 		}
 		pl.saveConfig();
-		pl.reloadConfig();
 		return true;
 	}
 
-	public void createJump(String Name, Player p) {
-		config.set("Jumps", "Test");
-		pl.saveConfig();
-		pl.reloadConfig();
+	public void createJump(String Name) {
+		config.set("Jumps." + Name, "");
 	}
 
 	public void removeJump(String Name) {
@@ -125,59 +115,33 @@ public class AdminCommand extends JavaPlugin implements Listener, CommandExecuto
 	}
 
 	public void setStart(String Name, Location loc) {
+		int x = Math.round(loc.getBlockX());
+		int y = Math.round(loc.getBlockY());
+		int z = Math.round(loc.getBlockZ());
 		config.set("Jumps." + Name + ".Start", loc.toVector());
+		loc.setX((double) x + 0.5);
+		loc.setY((double) y - 2);
+		loc.setZ((double) z + 0.5);
 		ArmorStand Stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		Stand.setCustomName(Name);
-		Stand.setCustomNameVisible(true);
+		Stand.setCustomNameVisible(false);
 		Stand.setGravity(false);
-		Stand.setVisible(false);
+		Stand.setVisible(true);
 	}
 
 	public void setEnde(String Name, Location loc) {
 		config.set("Jumps." + Name + ".Ende", loc.toVector());
 	}
 
-	public void setMoney(String Name, int Money) {
+	public void setMoney(String Name, double Money) {
 		config.set("Jumps." + Name + ".Money", Money);
 	}
 
-	public void addMaterial(String Name, int mat) {
-		Materials = config.getIntegerList("Jumps." + Name + ".Material");
-		Materials.add(mat);
-		config.set("Jumps." + Name + ".Material", Materials);
+	public void setYaw(String Name, int yaw) {
+		config.set("Jumps." + Name + ".StartYaw", yaw);
 	}
 
-	public void removeMaterial(String Name, int mat) {
-		Materials = (ArrayList<Integer>) config.getIntegerList("Jumps." + Name + ".Material");
-		Materials.remove((Object) mat);
-		config.set("Jumps." + Name + ".Material", Materials);
-	}
-
-	public List<Integer> Materials;
 	public Plugin pl;
 	public FileConfiguration config;
 	public List<String> tmp;
-
-	public static List<Entity> getNearbyEntities(Location where, int range) {
-		List<Entity> found = new ArrayList<Entity>();
-
-		for (Entity entity : where.getWorld().getEntities()) {
-			if (isInBorder(where, entity.getLocation(), range)) {
-				if (entity.getType() == EntityType.ARMOR_STAND) {
-					found.add(entity);
-				}
-			}
-		}
-		return found;
-	}
-
-	public static boolean isInBorder(Location center, Location notCenter, int range) {
-		int x = center.getBlockX(), z = center.getBlockZ();
-		int x1 = notCenter.getBlockX(), z1 = notCenter.getBlockZ();
-
-		if (x1 >= (x + range) || z1 >= (z + range) || x1 <= (x - range) || z1 <= (z - range)) {
-			return false;
-		}
-		return true;
-	}
 }
