@@ -1,8 +1,6 @@
 package de.Jannify.JandR;
 
-import java.awt.List;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.HashMap;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,7 +16,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Dye;
@@ -33,10 +30,8 @@ public class Action implements Listener {
 		config = pl.getConfig();
 		econ = Econ;
 	}
-	
-	List<ItemStack> Inv = new ArrayList<ItemStack>();
+
 	HashMap<Player, String> PlayerList = new HashMap<Player, String>();
-	HashMap<Player, Array[]> PlayerInv = new HashMap<Player, Array[]>();
 
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
@@ -60,13 +55,11 @@ public class Action implements Listener {
 				if (getNearbyEntities(p.getLocation(), 2) != null) {
 					String JumpName = getNearbyEntities(p.getLocation(), 2);
 					PlayerList.put(p, JumpName);
-					for (ItemStack stack : p.getInventory()) {
-						
-					}
-					p.getInventory().clear();
-
-					p.getInventory().addItem(Restart);
-					p.getInventory().addItem(Leave);
+					config.set("Jumps." + JumpName + "." + p.getName() + "Inv.1", p.getInventory().getItem(0));
+					config.set("Jumps." + JumpName + "." + p.getName() + "Inv.2", p.getInventory().getItem(1));
+					pl.saveConfig();
+					p.getInventory().setItem(0, Restart);
+					p.getInventory().setItem(1, Leave);
 					p.sendMessage(ChatColor.GREEN + "Du joinst dem Jump: " + ChatColor.BOLD + ChatColor.GOLD + JumpName);
 				}
 			}
@@ -74,16 +67,20 @@ public class Action implements Listener {
 				|| editBlock(loc, 0, -0.5).getType() == Material.GOLD_PLATE) {
 			if (PlayerList.containsKey(p)) {
 				String JumpName = PlayerList.get(p);
-				EconomyResponse r = econ.depositPlayer(p, config.getDouble("Jumps." + JumpName + ".Money"));
-				if (r.transactionSuccess()) {
-					p.sendMessage(String.format(ChatColor.GREEN + "Für diesen Jump wurde dir " + ChatColor.BOLD + ChatColor.GOLD + "%s" + ChatColor.RESET + ChatColor.GREEN + " gegeben.", econ.format(r.amount)));
-					p.sendMessage(String.format(ChatColor.GREEN + "Du hast jetzt " + ChatColor.BOLD + ChatColor.GOLD + "%s", econ.format(r.balance)));
-				} else {
-					p.sendMessage(String.format(ChatColor.DARK_RED + "Es ist ein Fehler aufgetreten: %s", r.errorMessage));
+				if (getNearbyEntities(p.getLocation(), 2).contains(JumpName)) {
+					EconomyResponse r = econ.depositPlayer(p, config.getDouble("Jumps." + JumpName + ".Money"));
+					if (r.transactionSuccess()) {
+						p.sendMessage(String.format(ChatColor.GREEN + "Für diesen Jump wurde dir " + ChatColor.BOLD + ChatColor.GOLD + "%s" + ChatColor.RESET + ChatColor.GREEN + " gegeben.", econ.format(r.amount)));
+						p.sendMessage(String.format(ChatColor.GREEN + "Du hast jetzt " + ChatColor.BOLD + ChatColor.GOLD + "%s", econ.format(r.balance)));
+					} else {
+						p.sendMessage(String.format(ChatColor.DARK_RED + "Es ist ein Fehler aufgetreten: %s", r.errorMessage));
+					}
+					setInventoryContent(p, JumpName);
+					PlayerList.remove(p);
+					p.sendMessage(ChatColor.GREEN + "Du hast den Jump: " + ChatColor.BOLD + ChatColor.GOLD + JumpName + ChatColor.RESET + ChatColor.GREEN + " geschaft");
+				}else {
+					p.sendMessage("§cDas ist nicht das richtigt Ende dieses Jump and Run's.");
 				}
-				PlayerList.remove(p);
-				p.getInventory().clear();
-				p.sendMessage(ChatColor.GREEN + "Du hast den Jump: " + ChatColor.BOLD + ChatColor.GOLD + JumpName + ChatColor.RESET + ChatColor.GREEN + " geschaft");
 			}
 		}
 	}
@@ -103,8 +100,9 @@ public class Action implements Listener {
 					}
 					p.teleport(loc);
 				} else if (p.getItemInHand().getType() == Material.GOLD_INGOT) {
+					p.sendMessage(p.toString() + PlayerList.get(p).toString());
+					setInventoryContent(p, PlayerList.get(p));
 					PlayerList.remove(p);
-					p.getInventory().clear();
 					p.sendMessage(ChatColor.GREEN + "Du hast den Jump: " + ChatColor.BOLD + ChatColor.GOLD + JumpName + ChatColor.RESET + ChatColor.GREEN + " abgebrochen");
 
 				}
@@ -158,6 +156,13 @@ public class Action implements Listener {
 		double bY = loc.getY() + Y;
 		loc = new Location(loc.getWorld(), loc.getX(), bY, loc.getZ());
 		return loc.getBlock();
+	}
+
+	public void setInventoryContent(Player p, String JumpName) {
+		p.getInventory().setItem(0, config.getItemStack("Jumps." + JumpName + "." + p.getName() + "Inv.1"));
+		p.getInventory().setItem(1, config.getItemStack("Jumps." + JumpName + "." + p.getName() + "Inv.2"));
+		config.set("Jumps." + JumpName + "." + p.getName() + "Inv", null);
+		pl.saveConfig();
 	}
 
 	public Plugin pl;

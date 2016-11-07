@@ -25,7 +25,7 @@ public class JumpSystem extends JavaPlugin {
 		System.out.println(prefix + "Starte  Jump and Run. . .");
 		
 		
-		System.out.println("Prüfe Vault. . .");
+		System.out.println("Pruefe Vault. . .");
 		if (!setupEconomy()) {
 			System.out.println("Vault nicht daaaaaa, oder put put. . .");
 			getServer().getPluginManager().disablePlugin(this);
