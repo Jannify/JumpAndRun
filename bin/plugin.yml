@@ -1,0 +1,17 @@
+name: JumpAndRun
+version: 1.2
+author: Jannify
+depend: [ Vault ]
+
+main: de.Jannify.JandR.JumpSystem
+
+commands:
+  jump:
+    description: Benötigt um jumps zu erstellen und einzustellen
+    aliases: [jumpandrun, jandr, jumps]
+  jvote:
+    description: Bewertet das am nächsten gelegene Jump and Run
+    aliases: [jumpvote]
+  jback:
+    description: Teleportiert dich zum Jump Villager
+    aliases: [jumpback]
